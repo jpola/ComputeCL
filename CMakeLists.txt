@@ -41,11 +41,15 @@ set(SRC_LIST
 )
 
 set(INC_LIST
+    include/primitves/Gather.h
+    include/utils/MatrixUtils.h
     include/utils/StorageType.h
     include/utils/cmd_options/CommandLineOptions.h
     include/io/MatrixMarket.h
+    include/io/Print.h
     include/datatypes/ClMatrixBase.h
     include/datatypes/ClMatrixCOO.h
+    include/iterator/SortIterator.h
 )
 
 add_executable(${PROJECT_NAME} ${SRC_LIST} ${INC_LIST})

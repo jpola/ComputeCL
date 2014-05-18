@@ -2,6 +2,7 @@
 #define MATRIX_MARKET_H
 
 #include "datatypes/ClMatrixCOO.h"
+#include "utils/MatrixUtils.h"
 
 
 #include <string.h>
@@ -319,7 +320,7 @@ namespace internal
             return;
         }
 
-    //    sortByRowCol(queue, matrix);
+        SortByRowCol(matrix);
     }
 
 

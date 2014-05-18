@@ -29,7 +29,7 @@ public:
 
     ClMatrixCOO() {};
 
-    ClMatrixCOO (ClMatrixCOO<TYPE, STORAGE_DEVICE>& matrix, compute::command_queue& queue)
+    ClMatrixCOO (const ClMatrixCOO<TYPE, STORAGE_DEVICE>& matrix, compute::command_queue& queue)
     {
 
         //resize if necessary
@@ -42,7 +42,7 @@ public:
 
         compute::future<void> col_future = compute::copy_async
                 (matrix.ColIndices().begin(), matrix.ColIndices().end(),
-                 col_indices.end(), queue);
+                 col_indices.begin(), queue);
 
        compute::future<void> val_future = compute::copy_async
                (matrix.Values().begin(), matrix.Values().end(),
@@ -66,7 +66,7 @@ public:
 
         compute::future<void> col_future = compute::copy_async
                 (matrix.ColIndices().begin(), matrix.ColIndices().end(),
-                 col_indices.end(), queue);
+                 col_indices.begin(), queue);
 
        compute::future<void> val_future = compute::copy_async
                (matrix.Values().begin(), matrix.Values().end(),
@@ -124,24 +124,14 @@ class ClMatrixCOO<TYPE, STORAGE_DEVICE>
 public:
 
     ClMatrixCOO(compute::command_queue& queue)
+        : row_indices(queue.get_context()),
+          col_indices(queue.get_context()),
+          values(queue.get_context())
     {
-        auto ctx = queue.get_context();
-        std::cout << "constructor ctx " << ctx.get() << std::endl;
-
-        row_indices = IdxVector(ctx);
-
-        col_indices = IdxVector(ctx);
-        values = ValVector(ctx);
-
-        row_indices.get_allocator().get_context() = ctx;
-        std::cout << "row_idx ctx: " << row_indices.get_allocator().get_context().get() << std::endl;
-        row_indices.get_allocator().get_context() = ctx;
-        std::cout << "row_idx ctx: " << row_indices.get_allocator().get_context().get() << std::endl;
-
-
+//        std::cout << "row_idx ctx: " << row_indices.get_allocator().get_context().get() << std::endl;
     }
 
-    ClMatrixCOO (ClMatrixCOO<TYPE, STORAGE_HOST>& matrix, compute::command_queue& queue)
+    ClMatrixCOO (const ClMatrixCOO<TYPE, STORAGE_HOST>& matrix, compute::command_queue& queue)
     {
 
         //resize if necessary
@@ -151,11 +141,9 @@ public:
         compute::future<void> row_future = compute::copy_async
                 (matrix.RowIndices().begin(), matrix.RowIndices().end(),
                  row_indices.begin(), queue);
-
         compute::future<void> col_future = compute::copy_async
                 (matrix.ColIndices().begin(), matrix.ColIndices().end(),
-                 col_indices.end(), queue);
-
+                 col_indices.begin(), queue);
         compute::future<void> val_future = compute::copy_async
                (matrix.Values().begin(), matrix.Values().end(),
                 values.begin(), queue);
@@ -166,8 +154,10 @@ public:
     }
 
     ClMatrixCOO (ClMatrixCOO<TYPE, STORAGE_HOST>&& matrix, compute::command_queue& queue)
+        : row_indices(queue.get_context()),
+          col_indices(queue.get_context()),
+          values(queue.get_context())
     {
-
         //resize if necessary
         if (this->numEntries() != matrix.numEntries())
             resize(matrix.numRows(), matrix.numCols(), matrix.numEntries(), queue);
@@ -175,11 +165,9 @@ public:
         compute::future<void> row_future = compute::copy_async
                 (matrix.RowIndices().begin(), matrix.RowIndices().end(),
                  row_indices.begin(), queue);
-
         compute::future<void> col_future = compute::copy_async
                 (matrix.ColIndices().begin(), matrix.ColIndices().end(),
-                 col_indices.end(), queue);
-
+                 col_indices.begin(), queue);
         compute::future<void> val_future = compute::copy_async
                (matrix.Values().begin(), matrix.Values().end(),
                 values.begin(), queue);
@@ -191,8 +179,6 @@ public:
 
     void resize(size_t num_rows, size_t num_cols, size_t num_entries, compute::command_queue& queue)
     {
-        auto ctx = queue.get_context();
-        std::cout << "resize ctx " << ctx.get() << std::endl;
         this->numRows(num_rows);
         this->numCols(num_cols);
         this->numEntries(num_entries);
