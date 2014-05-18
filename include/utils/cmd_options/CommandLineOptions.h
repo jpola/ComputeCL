@@ -6,7 +6,7 @@
 namespace computecl
 {
 
-    bool ParseCommandLine(int argc, char* argv[],
+    bool ParseCommandLine(int argc, const char* argv[],
                           std::string& vendor,
                           std::string& matrix_file)
     {

@@ -11,7 +11,7 @@ ADD_DEFINITIONS(
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 
 add_definitions(-D__CL_ENABLE_EXCEPTIONS)
-add_definitions(-DCL_USE_DEPRECATED_OPENCL_1_1_APIS)
+#add_definitions(-DCL_USE_DEPRECATED_OPENCL_1_1_APIS)
 
 
 # find OpenCL
@@ -43,6 +43,7 @@ set(INC_LIST
     include/matrix_operations/Transpose.h
     include/matrix_operations/ExtractDiagonal.h
     include/primitves/Gather.h
+    include/utils/Timer.h
     include/utils/MatrixUtils.h
     include/utils/StorageType.h
     include/utils/cmd_options/CommandLineOptions.h
@@ -62,3 +63,4 @@ add_library("${libname}" SHARED ${SRC_LIST} ${INC_LIST})
 target_link_libraries("${libname}" ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES} -lboost_program_options)
 
 add_subdirectory(tests)
+add_subdirectory(benchmarks)
