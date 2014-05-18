@@ -4,10 +4,11 @@
 #include <boost/compute/command_queue.hpp>
 #include <boost/compute/algorithm/iota.hpp>
 #include <boost/compute/algorithm/gather.hpp>
+#include <boost/compute/algorithm/sort_by_key.hpp>
 
-//cpu algorithms
-#include "primitves/Gather.h"
+#include "primitves/Gather.h" //gather on cpu;
 #include "io/Print.h"
+#include "iterator/SortIterator.h"
 
 using namespace boost::compute; // = boost::compute;
 
@@ -49,7 +50,7 @@ void SortByRowCol(MATRIX& matrix)
 
         //sort_by_key(temp.begin(), temp.end(), permutation.begin(), queue);
         std::copy(rows.begin(), rows.end(), temp.begin());
-        primitives::gather(permutation.begin(), permutation.end(),
+        primitives::Gather(permutation.begin(), permutation.end(),
                            temp.begin(),
                            rows.begin());
 
@@ -63,7 +64,7 @@ void SortByRowCol(MATRIX& matrix)
                    );
 
         std::copy(cols.begin(), cols.end(), temp.begin());
-        primitives::gather(permutation.begin(), permutation.end(),
+        primitives::Gather(permutation.begin(), permutation.end(),
                            temp.begin(),
                            cols.begin());
 
@@ -73,7 +74,7 @@ void SortByRowCol(MATRIX& matrix)
         {
             std::vector<ValueType>& values = matrix.Values();
             std::vector<ValueType> temp(values);
-            primitives::gather(permutation.begin(), permutation.end(),
+            primitives::Gather(permutation.begin(), permutation.end(),
                                temp.begin(),
                                values.begin());
         }
@@ -93,10 +94,10 @@ void SortByRowCol(MATRIX& matrix, command_queue& queue)
     compute::iota(permutation.begin(), permutation.end(), 0, queue);
 
     {
-        std::cerr << "Here should be stable sort by key" <<std::endl;
+        std::cerr << "sort on gpu (shoud be stable sort)" <<std::endl;
 
-        auto cols = matrix.ColIndices();
-        auto rows = matrix.RowIndices();
+        compute::vector<IndexType>& cols = matrix.ColIndices();
+        compute::vector<IndexType>& rows = matrix.RowIndices();
 
         compute::vector<IndexType> temp(cols);
 
@@ -111,7 +112,7 @@ void SortByRowCol(MATRIX& matrix, command_queue& queue)
         gather(permutation.begin(), permutation.end(), temp.begin(), cols.begin(), queue);
 
         {
-            auto values = matrix.Values();
+            compute::vector<ValueType>&  values = matrix.Values();
             compute::vector<ValueType> temp(values);
             gather(permutation.begin(), permutation.end(), temp.begin(), values.begin(), queue);
         }
@@ -122,35 +123,7 @@ void SortByRowCol(MATRIX& matrix, command_queue& queue)
 
 
 }
-//CUSP_PROFILE_SCOPED();
 
-//typedef typename Array1::value_type IndexType;
-//typedef typename Array3::value_type ValueType;
-//typedef typename Array1::memory_space MemorySpace;
-
-//size_t N = rows.size();
-
-//cusp::array1d<IndexType,MemorySpace> permutation(N);
-//thrust::sequence(permutation.begin(), permutation.end());
-
-//// compute permutation and sort by (I,J)
-//{
-//    cusp::array1d<IndexType,MemorySpace> temp(columns);
-//    thrust::stable_sort_by_key(temp.begin(), temp.end(), permutation.begin());
-
-//    cusp::copy(rows, temp);
-//    thrust::gather(permutation.begin(), permutation.end(), temp.begin(), rows.begin());
-//    thrust::stable_sort_by_key(rows.begin(), rows.end(), permutation.begin());
-
-//    cusp::copy(columns, temp);
-//    thrust::gather(permutation.begin(), permutation.end(), temp.begin(), columns.begin());
-//}
-
-//// use permutation to reorder the values
-//{
-//    cusp::array1d<ValueType,MemorySpace> temp(values);
-//    thrust::gather(permutation.begin(), permutation.end(), temp.begin(), values.begin());
-//}
 } //computecl
 
 #endif //_MATRIX_UTILS_H

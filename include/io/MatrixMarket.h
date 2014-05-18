@@ -1,14 +1,17 @@
 #ifndef MATRIX_MARKET_H
 #define MATRIX_MARKET_H
 
-#include "datatypes/ClMatrixCOO.h"
-#include "utils/MatrixUtils.h"
-
+#include <boost/compute/command_queue.hpp>
 
 #include <string.h>
 #include <vector>
 #include <fstream>
 #include <algorithm>
+
+#include "datatypes/ClMatrixCOO.h"
+#include "utils/MatrixUtils.h"
+
+
 
 /**
   * Functions to read matrix in matrix market (*.mtx) format
@@ -320,7 +323,7 @@ namespace internal
             return;
         }
 
-        SortByRowCol(matrix);
+       // SortByRowCol(matrix);
     }
 
 
@@ -363,6 +366,7 @@ void readMatrixMarket (ClHostMatrixCOO<TYPE>& matrix,
                        const std::string& filename)
 {
     internal::read (matrix, filename);
+    SortByRowCol(matrix);
 }
 
 /**
@@ -378,6 +382,7 @@ void readMatrixMarket (ClDeviceMatrixCOO<TYPE>& matrix,
     internal::read(host_matrix, filename);
 
     matrix = ClDeviceMatrixCOO<TYPE>(std::move(host_matrix), queue);
+    SortByRowCol(matrix, queue);
 }
 
 /**

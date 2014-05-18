@@ -33,7 +33,6 @@ set(BoostCompute_INCLUDE_DIRS "/home/kuba/External/compute/include")
 include_directories(SYSTEM ${BoostCompute_INCLUDE_DIRS})
 
 
-include_directories(include)
 
 set(SRC_LIST
     main.cpp
@@ -41,6 +40,8 @@ set(SRC_LIST
 )
 
 set(INC_LIST
+    include/matrix_operations/Transpose.h
+    include/matrix_operations/ExtractDiagonal.h
     include/primitves/Gather.h
     include/utils/MatrixUtils.h
     include/utils/StorageType.h
@@ -51,6 +52,13 @@ set(INC_LIST
     include/datatypes/ClMatrixCOO.h
     include/iterator/SortIterator.h
 )
+set(libname computecl)
 
-add_executable(${PROJECT_NAME} ${SRC_LIST} ${INC_LIST})
-target_link_libraries("${PROJECT_NAME}" ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES} -lboost_program_options)
+include_directories(include)
+
+add_library("${libname}" SHARED ${SRC_LIST} ${INC_LIST})
+
+#add_executable(${PROJECT_NAME} ${SRC_LIST} ${INC_LIST})
+target_link_libraries("${libname}" ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES} -lboost_program_options)
+
+add_subdirectory(tests)
